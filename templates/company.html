@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Company Insight</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: rgb(212, 234, 241);
+    }
+
+    .navbar navbar-default {
+      background-color: whitesmoke;
+      height: 50px;
+      overflow: hidden;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .logo-img {
+      height: 40px;
+      transform-origin: left center;
+      position: relative;
+      top: -10px;
+    }
+
+    .navbar-dark {
+      background-color: #1f1f1f !important;
+      border-color: #444;
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #ccc;
+      border-radius: 20px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: 0.4s;
+    }
+
+    /* Corrected knob styling */
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      /* Only use left, remove right */
+      bottom: 2px;
+      /* Center vertically with some spacing */
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    /* Checked style */
+    input:checked+.slider {
+      background-color: #41a782;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(20px);
+      /* Adjust distance as per width */
+    }
+
+    /* Optional: Add round style */
+    .slider.round {
+      border-radius: 25px;
+    }
+
+    .main-container {
+      display: flex;
+      height: calc(100vh - 50px);
+      /* Full height minus navbar */
+      width: 100vw;
+    }
+
+    .left-column {
+      width: 20vw;
+      padding: 20px;
+      box-sizing: border-box;
+      border-right: 3px solid #ddd;
+    }
+
+    .left-column label {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .left-column input,
+    .left-column button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .left-column button {
+      background-color: #6c5ce7;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+    }
+
+    .left-column button:hover {
+      background-color: #5a4fd6;
+    }
+
+    .right-column {
+      width: 80vw;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .result-container {
+      height: 55%;
+      width: 70%;
+      border-radius: 10px;
+      padding: 20px;
+      margin-left: 15%;
+      background-color: whitesmoke;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-container h4 {
+      font-weight: bold;
+    }
+
+    .result-container p {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .result-container p:last-child {
+      border-bottom: none;
+    }
+
+    /* DARK MODE */
+    body.dark-mode {
+      background-color: #000000;
+      color: white;
+    }
+
+    body.dark-mode input,
+    body.dark-mode select {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .result-container {
+      background-color: #333;
+      color: white;
+    }
+
+    body.dark-mode .left-column {
+      border-right: 1px solid #444;
+    }
+
+    body.dark-mode .left-column button {
+      background-color: #6c5ce7;
+    }
+
+    body.dark-mode .left-column button:hover {
+      background-color: #5a4fd6;
+    }
+
+    body.dark-mode .dropdown-menu {
+      background-color: #2e2e2e;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .dropdown-menu>li>a {
+      color: white;
+    }
+
+    body.dark-mode .dropdown-menu>li>a:hover {
+      background-color: #444;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+        </a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="/">Home</a></li>
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">Service <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/market_form">Market Insight</a></li>
+            <li><a href="/company_form">Company Insight</a></li>
+            <li><a href="/pnl_form">P&L Calculation</a></li>
+            <li><a href="/indicator_form">Indicators</a></li>
+            <li><a href="/widgets_form">Widgets</a></li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+        <li style="float: right; margin-right: 20px; margin-top: 12px;">
+          <label class="switch">
+            <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+            <span class="slider round"></span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- PAGE LAYOUT -->
+  <div class="main-container">
+    <!-- LEFT -->
+    <div class="left-column">
+      <form method="POST" action="/company_insight">
+        <label for="symbol">Company Symbol:</label>
+        <input type="text" name="symbol" id="symbol" value="{{ request.form.symbol if request.form.symbol }}">
+
+        <label for="date">Date:</label>
+        <input type="date" name="date" id="date" value="{{ request.form.date if request.form.date }}">
+
+        <label for="num">Window Size:</label>
+        <input type="number" name="num" id="num" value="{{ request.form.num if request.form.num }}">
+
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right-column">
+      <div class="result-container">
+        <h4 style="text-align:center;">Company Insight Result</h4>
+        {% if result %}
+        {% for key, value in result.items() %}
+        <p><strong>{{ key }}</strong>: {{ value }}</p>
+        {% endfor %}
+        {% else %}
+        <p style="text-align:center; color:gray;">No data yet. Submit the form to view company insight.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setTheme(mode) {
+      const body = document.body;
+      const navbar = document.querySelector('.navbar');
+      const toggle = document.getElementById('themeToggle');
+      const label = document.getElementById('themeLabel');
+      currentTheme = mode;
+
+      if (mode === 'dark') {
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
+        navbar.classList.add('navbar-dark');
+        toggle.checked = true;
+      } else {
+        body.classList.add('light-mode');
+        body.classList.remove('dark-mode');
+        navbar.classList.remove('navbar-dark');
+        toggle.checked = false;
+      }
+      localStorage.setItem('theme', mode);
+    }
+
+    function toggleTheme() {
+      const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+
+    window.onload = function () {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+    };
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicators</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: rgb(212, 234, 241);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .navbar-dark {
+            background-color: #1f1f1f !important;
+            border-color: #444;
+        }
+
+        .navbar navbar-default {
+            background-color: whitesmoke;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-img {
+            height: 40px;
+            transform-origin: left center;
+            position: relative;
+            top: -10px;
+        }
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            background-color: #ccc;
+            border-radius: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: 0.4s;
+        }
+
+        /* Corrected knob styling */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            /* Only use left, remove right */
+            bottom: 2px;
+            /* Center vertically with some spacing */
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        /* Checked style */
+        input:checked+.slider {
+            background-color: #41a782;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            /* Adjust distance as per width */
+        }
+
+        /* Optional: Add round style */
+        .slider.round {
+            border-radius: 25px;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .left-column {
+            width: 20vw;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .left-column label {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .left-column select,
+        .left-column input,
+        .left-column button {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .left-column .btn {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            background-color: white;
+            color: #121212;
+        }
+
+        .left-column .btn:hover {
+            background-color: rgb(208, 203, 203);
+        }
+
+        .left-column button {
+            background-color: #6c5ce7;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 999px;
+        }
+
+        .left-column button:hover {
+            background-color: #5a4fd6;
+        }
+
+        .right-column {
+            width: 75vw;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .right-column h3 {
+            font-weight: bold;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: lightslategray;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        body.dark-mode {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .left-column {
+            border-right: 1px solid #444;
+        }
+
+        body.dark-mode table {
+            background-color: #1e1e1e;
+        }
+
+        body.dark-mode th {
+            background-color: #333;
+            color: white;
+        }
+
+        body.dark-mode td {
+            border-color: #444;
+        }
+
+        body.dark-mode .left-column .btn {
+            width: 80%;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            background-color: #333;
+            color: white;
+        }
+
+        body.dark-mode .left-column .btn:hover {
+            background-color: #1f1f1f;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background-color: #2e2e2e;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu>li>a {
+            color: white;
+        }
+
+        body.dark-mode .dropdown-menu>li>a:hover {
+            background-color: #444;
+            color: #fff;
+        }
+
+        #indicatorList li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            padding: 6px 10px;
+        }
+
+
+        #indicatorList input[type="checkbox"] {
+            margin: 0;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+        }
+
+        #indicatorList label {
+            margin: 0;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        #indicatorList input[type="number"] {
+            width: 80px;
+            padding: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">Service <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/market_form">Market Insight</a></li>
+                        <li><a href="/company_form">Company Insight</a></li>
+                        <li><a href="/pnl_form">P&L Calculation</a></li>
+                        <li><a href="/indicator_form">Indicators</a></li>
+                        <li><a href="/widgets_form">Widgets</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+                <li style="float: right; margin-right: 20px; margin-top: 12px;">
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="left-column">
+            <form id="indicatorForm" action="/indicators" method="POST">
+                <label for="symbol">Symbol:</label>
+                <input type="text" id="symbol" name="symbol" required>
+
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label>Indicators:</label>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                        Select Indicators <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" id="indicatorList"
+                        style="padding: 0 !important; max-height: 300px; overflow-y: auto; width: 50%;">
+                        <!-- Dynamically generated -->
+                    </ul>
+                </div>
+
+                <input type="hidden" id="finalIndicators" name="finalIndicators">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <div class="right-column">
+            <h3>Indicator Results</h3>
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Symbol</th>
+                        <th>Indicator</th>
+                        <th>Window Size</th>
+                        <th>Close</th>
+                        <th>Value</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const indicators = ['SMA', 'EMA', 'RSI', 'StochRSI'];
+
+        function createIndicatorCheckboxes() {
+            const container = document.getElementById('indicatorList');
+            container.innerHTML = '';
+
+            indicators.forEach(ind => {
+                const li = document.createElement('li');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = ind;
+                checkbox.name = 'indicator';
+                checkbox.value = ind;
+
+                const label = document.createElement('label');
+                label.htmlFor = ind;
+                label.innerText = ind;
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.placeholder = 'Window Size';
+                input.style.display = 'none';
+                input.name = `${ind}_window`;
+
+                checkbox.addEventListener('change', () => {
+                    input.style.display = checkbox.checked ? 'inline-block' : 'none';
+                });
+
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                li.appendChild(input);
+                container.appendChild(li);
+            });
+        }
+
+        function saveToLocalStorage(data) {
+            const existing = JSON.parse(localStorage.getItem('indicatorData')) || [];
+            const updated = existing.concat(data);
+            localStorage.setItem('indicatorData', JSON.stringify(updated));
+        }
+
+        function deleteRowFromStorage(index) {
+            let rows = JSON.parse(localStorage.getItem('indicatorData')) || [];
+            rows.splice(index, 1);
+            localStorage.setItem('indicatorData', JSON.stringify(rows));
+            loadTableData();
+        }
+
+        function loadTableData() {
+            const tbody = document.querySelector('#resultTable tbody');
+            tbody.innerHTML = '';
+            const stored = JSON.parse(localStorage.getItem('indicatorData')) || [];
+
+            stored.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                <td>${row.Date || '-'}</td>
+                <td>${row.Symbol || '-'}</td>
+                <td>${row.indicator || '-'}</td>
+                <td>${row.w_size || '-'}</td>
+                <td>${row.close || '-'}</td>
+                <td>${row.values || '-'}</td>
+                <td><button class="delete-btn">X</button></td>
+            `;
+                tr.querySelector('.delete-btn').addEventListener('click', () => deleteRowFromStorage(index));
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('indicatorForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch(this.action, { method: 'POST', body: formData });
+                const data = await response.json();
+
+                saveToLocalStorage(data);
+                loadTableData(); // Refresh table with updated localStorage
+            } catch (err) {
+                alert('Failed to fetch data: ' + err.message);
+                console.error(err);
+            }
+        });
+
+        function setTheme(mode) {
+            const body = document.body;
+            const navbar = document.querySelector('.navbar');
+            const toggle = document.getElementById('themeToggle');
+
+            if (mode === 'dark') {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
+                navbar.classList.add('navbar-dark');
+                toggle.checked = true;
+            } else {
+                body.classList.add('light-mode');
+                body.classList.remove('dark-mode');
+                navbar.classList.remove('navbar-dark');
+                toggle.checked = false;
+            }
+            localStorage.setItem('theme', mode);
+        }
+
+        function toggleTheme() {
+            const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        window.onload = function () {
+            setTheme(localStorage.getItem('theme') || 'light');
+            createIndicatorCheckboxes();
+            loadTableData();
+        };
+    </script>
+
+
+</body>
+
+</html>

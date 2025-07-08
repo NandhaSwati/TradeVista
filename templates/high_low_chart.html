@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphs</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: rgb(212, 234, 241);
+            padding: 20px;
+        }
+
+        .navbar navbar-default {
+            background-color: whitesmoke;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-img {
+            height: 40px;
+            transform-origin: left center;
+            position: relative;
+            top: -10px;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            background-color: #ccc;
+            border-radius: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: 0.4s;
+        }
+
+        /* Corrected knob styling */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            /* Only use left, remove right */
+            bottom: 2px;
+            /* Center vertically with some spacing */
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        /* Checked style */
+        input:checked+.slider {
+            background-color: #41a782;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            /* Adjust distance as per width */
+        }
+
+        /* Optional: Add round style */
+        .slider.round {
+            border-radius: 25px;
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode .container,
+        body.dark-mode .container1 {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode label {
+            color: white;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background-color: #2e2e2e;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu>li>a {
+            color: white;
+        }
+
+        body.dark-mode .dropdown-menu>li>a:hover {
+            background-color: #444;
+            color: #fff;
+        }
+
+        .navbar-dark {
+            background-color: #1f1f1f !important;
+            border-color: #444;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">Service <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/market_form">Market Insight</a></li>
+                        <li><a href="/company_form">Company Insight</a></li>
+                        <li><a href="/pnl_form">P&L Calculation</a></li>
+                        <li><a href="/indicator_form">Indicators</a></li>
+                        <li><a href="/widgets_form">Widgets</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+                <li style="float: right; margin-right: 20px; margin-top: 12px;">
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="graph-container">
+        <canvas id="lineChart" width="800" height="250"></canvas>
+        <div id="range-buttons" style="margin-top: 20px; text-align: center;">
+            <div class="range-button" id="btn-1d" onclick="loadGraph(currentSymbol, '1d')">
+                <div class="label">1 day</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="range-button" id="btn-5d" onclick="loadGraph(currentSymbol, '5d')">
+                <div class="label">5 days</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="range-button" id="btn-1m" onclick="loadGraph(currentSymbol, '1m')">
+                <div class="label">1 month</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="range-button" id="btn-6m" onclick="loadGraph(currentSymbol, '6m')">
+                <div class="label">6 months</div>
+                <div class="change">--%</div>
+            </div>
+            <div class="range-button" id="btn-1y" onclick="loadGraph(currentSymbol, '1y')">
+                <div class="label">1 year</div>
+                <div class="change">--%</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let chart;
+        let currentSymbol = '^NSEI'
+
+        // Custom vertical line plugin
+        const verticalLinePlugin = {
+            id: 'customLine',
+            afterDraw: (chart) => {
+                if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+                    const ctx = chart.ctx;
+                    const x = chart.tooltip._active[0].element.x;
+                    const topY = chart.chartArea.top;
+                    const bottomY = chart.chartArea.bottom;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, topY);
+                    ctx.lineTo(x, bottomY);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#888';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        };
+
+        Chart.register(verticalLinePlugin);
+
+
+        function loadGraph(symbol, range) {
+            fetch(`/graph_page?symbol=${symbol}&range=${range}`).then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('lineChart').getContext('2d');
+                    const isPositive = data.close[data.close.length - 1] >= data.close[0];
+                    const borderColor = isPositive ? "#00d084" : "#ff3c3c";
+                    const backgroundColor = isPositive ? "rgba(0, 208, 132, 0.2)" : "rgb(67, 0, 0)";
+                    currentSymbol = symbol
+
+                    if (chart) {
+                        chart.destroy();
+                    }
+
+                    chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: symbol + 'Closing Price',
+                                data: data.high,
+                                borderColor: borderColor,
+                                backgroundColor: backgroundColor,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,              // hide points by default
+                                pointHoverRadius: 5,         // show a dot on hover
+                                pointHitRadius: 10,
+                                pointHoverBackgroundColor: borderColor,
+                                //pointHoverBorderWidth: 2,
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: '#2a2a2a',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    titleFont: { weight: 'bold' },
+                                    callbacks: {
+                                        title: function (context) {
+                                            const date = new Date(context[0].label);
+                                            return date.toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            });
+                                        },
+                                        label: function (context) {
+                                            return `${context.formattedValue}`;
+                                        }
+                                    }
+                                },
+                                crosshair: {
+                                    line: {
+                                        color: '#888', // Vertical line color
+                                        width: 1
+                                    },
+                                    sync: { enabled: false },
+                                    zoom: { enabled: false }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'month',
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false
+                                    },
+                                    ticks: { color: currentTheme === 'dark' ? '#ccc' : '#333' }
+                                },
+                                y: {
+                                    position: 'right',
+                                    ticks: { color: currentTheme === 'dark' ? '#ccc' : '#333' },
+                                    title: {
+                                        display: true,
+                                        text: 'Price',
+                                        color: currentTheme === 'dark' ? '#ccc' : '#333'
+                                    }
+                                }
+                            },
+                        }
+                    });
+                });
+        }
+
+        function setTheme(mode) {
+            const body = document.body;
+            const navbar = document.querySelector('.navbar');
+            const toggle = document.getElementById('themeToggle');
+            const label = document.getElementById('themeLabel');
+            currentTheme = mode;
+
+            if (mode === 'dark') {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
+                navbar.classList.add('navbar-dark');
+                toggle.checked = true;
+            } else {
+                body.classList.add('light-mode');
+                body.classList.remove('dark-mode');
+                navbar.classList.remove('navbar-dark');
+                toggle.checked = false;
+            }
+            localStorage.setItem('theme', mode);
+
+            loadGraph(currentSymbol, '1y');
+        }
+
+        function toggleTheme() {
+            const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        window.onload = function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            loadGraph(currentSymbol, '1y');
+        };
+    </script>
+</body>
+</html>

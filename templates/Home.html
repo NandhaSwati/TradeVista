@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Home</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: whitesmoke;
+            padding: 20px;
+        }
+
+        .navbar navbar-default {
+            background-color: whitesmoke;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-img {
+            height: 40px;
+            transform-origin: left center;
+            position: relative;
+            top: -10px;
+        }
+
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            background-color: #ccc;
+            border-radius: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: 0.4s;
+        }
+
+        /* Corrected knob styling */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            /* Only use left, remove right */
+            bottom: 2px;
+            /* Center vertically with some spacing */
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        /* Checked style */
+        input:checked+.slider {
+            background-color: #41a782;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            /* Adjust distance as per width */
+        }
+
+        /* Optional: Add round style */
+        .slider.round {
+            border-radius: 25px;
+        }
+
+        .ticker-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .ticker {
+            display: flex;
+            align-items: center;
+            border-radius: 50px;
+            padding: 10px 20px 10px 10px;
+            gap: 15px;
+            min-width: 250px;
+            height: 60px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .ticker:hover {
+            background-color: rgb(208, 203, 203);
+        }
+
+        .circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: dodgerblue;
+            margin-left: -10px;
+        }
+
+        .ticker-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        .ticker-name {
+            color: #121212;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .ticker-line {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .ticker-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #121212;
+        }
+
+        .ticker-change {
+            font-size: 14px;
+            color: #00d084;
+            font-weight: bold;
+        }
+
+        body.light-mode #range-buttons {
+            display: flex;
+            justify-content: left;
+            /* center the buttons horizontally */
+            flex-wrap: nowrap;
+            /* keep all buttons in one line */
+            gap: 10px;
+            /* space between buttons */
+            margin-bottom: 20px;
+        }
+
+        body.light-mode .range-button {
+            color: #121212 !important;
+            background-color: #ccc !important;
+            padding: 10px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        body.light-mode .range-button .change-value {
+            color: ;
+        }
+
+        body.light-mode .range-button:hover {
+            color: #121212 !important;
+            background-color: #555 !important;
+        }
+
+        body.light-mode .range-button .label {
+            font-size: 14px;
+        }
+
+        .change-value {
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: bold;
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode .container,
+        body.dark-mode .container1 {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode label {
+            color: white;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background-color: #2e2e2e;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu>li>a {
+            color: white;
+        }
+
+        body.dark-mode .dropdown-menu>li>a:hover {
+            background-color: #444;
+            color: #fff;
+        }
+
+        body.dark-mode .ticker:hover {
+            background-color: #555;
+        }
+
+        body.dark-mode .circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: dodgerblue;
+            margin-left: -10px;
+        }
+
+        body.dark-mode .ticker-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            line-height: 1.2;
+        }
+
+        body.dark-mode .ticker-name {
+            color: #ccc;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        body.dark-mode .ticker-line {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        body.dark-mode .ticker-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        body.dark-mode .ticker-change {
+            font-size: 14px;
+            color: #00d084;
+            font-weight: bold;
+        }
+
+        body.dark-mode #range-buttons {
+            display: flex;
+            justify-content: left;
+            /* center the buttons horizontally */
+            flex-wrap: nowrap;
+            /* keep all buttons in one line */
+            gap: 10px;
+            /* space between buttons */
+            margin-bottom: 20px;
+        }
+
+        body.dark-mode .range-button {
+            background-color: #000000;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        body.dark-mode .range-button:hover {
+            background-color: #121212;
+        }
+
+        body.dark-mode .range-button .label {
+            font-size: 14px;
+        }
+
+        .navbar-dark {
+            background-color: #1f1f1f !important;
+            border-color: #444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">Service <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/market_form">Market Insight</a></li>
+                        <li><a href="/company_form">Company Insight</a></li>
+                        <li><a href="/pnl_form">P&L Calculation</a></li>
+                        <li><a href="/indicator_form">Indicators</a></li>
+                        <li><a href="/widgets_form">Widgets</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+                <li style="float: right; margin-right: 20px; margin-top: 12px;">
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="ticker-container">
+        {% for ticker in tickers %}
+        <div class="ticker" onclick="loadGraph('{{ ticker.symbol }}')" style="cursor: pointer;">
+            <a href="/graph_page?symbol={{ ticker.symbol }}&range=1y">
+                <div class="circle" style="background-color: dodgerblue; cursor: pointer;">
+                    {{ ticker.logo }}
+                </div>
+            </a>
+            <div class="ticker-info">
+                <div class="ticker-name">{{ ticker.name }}</div>
+                <div class="ticker-line">
+                    <div class="ticker-value">
+                        {{ ticker.value }}<span style="font-size: 10px;">USD</span>
+                    </div>
+                    <div class="ticker-change" style="color: {{ '+' in ticker.sign and '#00d084' or '#ff3c3c' }}">
+                        {{ ticker.change }}<span>%</span>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+
+    <div id="graph-container">
+        <canvas id="lineChart" width="800" height="250"></canvas>
+        <h3>High-Low Charts:</h3>
+        <div id="range-buttons" style="margin-top: 20px; text-align: center;">
+            <div class="range-button" id="btn-1d" onclick="graphData(currentSymbol, '1d')">
+                <div class="label">1 day</div>
+                <div class="change-value"></div>
+            </div>
+            <div class="range-button" id="btn-1w" onclick="graphData(currentSymbol, '1w')">
+                <div class="label">1 Week</div>
+                <div class="change-value"></div>
+            </div>
+            <div class="range-button" id="btn-1m" onclick="graphData(currentSymbol, '1m')">
+                <div class="label">1 month</div>
+                <div class="change-value"></div>
+            </div>
+            <div class="range-button" id="btn-6m" onclick="graphData(currentSymbol, '6m')">
+                <div class="label">6 months</div>
+                <div class="change-value"></div>
+            </div>
+            <div class="range-button" id="btn-1y" onclick="graphData(currentSymbol, '1y')">
+                <div class="label">1 year</div>
+                <div class="change-value"></div>
+            </div>
+        </div>
+        <canvas id="lineChart2" width="800" height="250"></canvas>
+    </div>
+
+
+
+    <script>
+
+        let chart1, chart2;
+        let currentSymbol = '^NSEI';
+        // Custom vertical line plugin
+        const verticalLinePlugin = {
+            id: 'customLine',
+            afterDraw: (chart) => {
+                if (chart.tooltip && chart.tooltip._active && chart.tooltip._active.length) {
+                    const ctx = chart.ctx;
+                    const x = chart.tooltip._active[0].element.x;
+                    const topY = chart.chartArea.top;
+                    const bottomY = chart.chartArea.bottom;
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(x, topY);
+                    ctx.lineTo(x, bottomY);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = '#888';
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+        };
+
+        Chart.register(verticalLinePlugin);
+
+        function loadAllChangeValues(symbol) {
+            fetch(`/get_all_changes?symbol=${symbol}`)
+                .then(res => res.json())
+                .then(data => {
+                    for (const [range, info] of Object.entries(data)) {
+                        const button = document.getElementById(`btn-${range}`);
+                        if (button) {
+                            const changeDiv = button.querySelector('.change-value');
+                            const color = info.sign === '+' ? '#00d084' : '#ff3c3c';
+                            changeDiv.textContent = `${info.sign}${Math.abs(info.change).toFixed(2)}%`;
+                            changeDiv.style.color = color;
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading all change values:', err));
+        }
+
+        function loadGraph(symbol) {
+            currentSymbol = symbol;
+            fetch(`/get_data?symbol=${symbol}`).then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('lineChart').getContext('2d');
+                    const changeValue = data.change || 0;
+                    const isPositive = changeValue >= 0;
+                    const borderColor = isPositive ? "#00d084" : "#ff3c3c";
+                    const backgroundColor = isPositive ? "rgba(0, 208, 132, 0.2)" : "rgba(255, 60, 60, 0.2)";
+
+
+                    if (chart1) {
+                        chart1.destroy();
+                    }
+
+                    chart1 = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.dates,
+                            datasets: [{
+                                label: symbol + 'Closing Price',
+                                data: data.close,
+                                borderColor: borderColor,
+                                backgroundColor: backgroundColor,
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: 0,              // hide points by default
+                                pointHoverRadius: 5,         // show a dot on hover
+                                pointHitRadius: 10,
+                                pointHoverBackgroundColor: borderColor,
+                                //pointHoverBorderWidth: 2,
+                                borderWidth: 1.5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    mode: 'index',
+                                    intersect: false,
+                                    backgroundColor: '#2a2a2a',
+                                    titleColor: '#fff',
+                                    bodyColor: '#fff',
+                                    titleFont: { weight: 'bold' },
+                                    callbacks: {
+                                        title: function (context) {
+                                            const date = new Date(context[0].label);
+                                            return date.toLocaleDateString('en-US', {
+                                                year: 'numeric',
+                                                month: 'short',
+                                                day: 'numeric'
+                                            });
+                                        },
+                                        label: function (context) {
+                                            return `${context.formattedValue}`;
+                                        }
+                                    }
+                                },
+                                crosshair: {
+                                    line: {
+                                        color: '#888', // Vertical line color
+                                        width: 1
+                                    },
+                                    sync: { enabled: false },
+                                    zoom: { enabled: false }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'month',
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false
+                                    },
+                                    ticks: {
+                                        color: currentTheme === 'dark' ? '#ccc' : '#333',
+                                        font: {
+                                            size: 12,
+                                            family: 'Arial, sans-serif',
+                                            weight: 'normal'
+                                        },
+                                        maxRotation: 0,
+                                        minRotation: 0,
+                                        autoSkip: true,
+                                        callback: function (value, index, ticks) {
+                                            const date = new Date(this.getLabelForValue(value));
+                                            const month = date.toLocaleString('default', { month: 'short' });
+                                            const year = date.getFullYear();
+
+                                            if (month === 'Jan') {
+                                                return `${year}`;  // Show year instead of 'Jan'
+                                            } else {
+                                                return `${month}`; // Show month abbreviation
+                                            }
+                                        }
+                                    }
+
+                                },
+                                y: {
+                                    position: 'right',
+                                    ticks: { color: currentTheme === 'dark' ? '#ccc' : '#333' },
+                                    title: {
+                                        display: true,
+                                        text: 'Price',
+                                        color: currentTheme === 'dark' ? '#ccc' : '#333'
+                                    }
+                                }
+                            },
+                        }
+                    });
+                    loadAllChangeValues(symbol);
+                });
+        }
+
+        function graphData(symbol, range) {
+            console.log("Calling graphData()", symbol, range);
+            fetch(`/graph_page?symbol=${symbol}&range=${range}`)
+                .then(res => {
+                    console.log("Response status:", res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("graphData() received:", data);
+                    if (!data.labels || !data.high || !data.low) {
+                        console.error("Missing keys in response JSON");
+                        return;
+                    }
+                    // Set change % text inside corresponding button
+
+
+                    renderChart2(data, range);
+                })
+                .catch(err => console.error("graphData() fetch error:", err));
+        }
+
+        function renderChart2(data, range) {
+            let xTimeUnit, xTimeFormat;
+
+            // Define units and formats based on range
+            if (range === '1d') {
+                xTimeUnit = 'minute';
+                xTimeFormat = 'HH:mm';
+            } else if (range === '1w' || range === '1m') {
+                xTimeUnit = 'day';
+                xTimeFormat = 'dd MMM';
+            } else if (range === '6m' || range === '1y') {
+                xTimeUnit = 'month';
+                xTimeFormat = 'MMM';
+            }
+
+            const ctx = document.getElementById('lineChart2').getContext('2d');
+            if (chart2) chart2.destroy();
+
+            chart2 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'High',
+                        data: data.high,
+                        borderColor: 'blue',
+                        fill: false,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHitRadius: 10,
+                        pointHoverBackgroundColor: 'blue',
+                        borderWidth: 1.5
+                    }, {
+                        label: 'Low',
+                        data: data.low,
+                        borderColor: 'orange',
+                        fill: false,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHitRadius: 10,
+                        pointHoverBackgroundColor: 'orange',
+                        borderWidth: 1.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'start',
+                            labels: {
+                                color: currentTheme === 'dark' ? '#ccc' : '#333',
+                                boxWidth: 20,
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: '#2a2a2a',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            titleFont: { weight: 'bold' },
+                            callbacks: {
+                                title: function (context) {
+                                    const date = new Date(context[0].label);
+                                    return date.toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    });
+                                },
+                                label: function (context) {
+                                    return `${context.formattedValue}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: xTimeUnit,
+                                displayFormats: {
+                                    minute: 'HH:mm',
+                                    hour: 'HH:mm',
+                                    day: 'dd MMM',
+                                    month: 'MMM',
+                                    year: 'yyyy'
+                                },
+                                stepSize: range === '1d' ? 15 : undefined
+                            },
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 20,
+                                color: currentTheme === 'dark' ? '#ccc' : '#333',
+                                callback: function (value) {
+                                    const date = new Date(value);
+                                    if (range === '1d') {
+                                        return date.toLocaleTimeString('en-US', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false
+                                        });
+                                    } else if (range === '1w' || range === '1m') {
+                                        return date.toLocaleDateString('en-US', {
+                                            day: 'numeric',
+                                            month: 'short'
+                                        });
+                                    } else if (range === '6m' || range === '1y') {
+                                        const month = date.toLocaleString('default', { month: 'short' });
+                                        const year = date.getFullYear();
+                                        return month === 'Jan' ? `${year}` : month;
+                                    }
+                                    return value;
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: xTimeUnit === 'minute' ? 'Time (HH:mm)' : 'Date',
+                                color: currentTheme === 'dark' ? '#ccc' : '#333'
+                            }
+                        },
+                        y: {
+                            position: 'right',
+                            ticks: { color: currentTheme === 'dark' ? '#ccc' : '#333' },
+                            title: {
+                                display: true,
+                                text: 'Price',
+                                color: currentTheme === 'dark' ? '#ccc' : '#333'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setTheme(mode) {
+            const body = document.body;
+            const navbar = document.querySelector('.navbar');
+            const toggle = document.getElementById('themeToggle');
+            const label = document.getElementById('themeLabel');
+            currentTheme = mode;
+
+            if (mode === 'dark') {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
+                navbar.classList.add('navbar-dark');
+                toggle.checked = true;
+            } else {
+                body.classList.add('light-mode');
+                body.classList.remove('dark-mode');
+                navbar.classList.remove('navbar-dark');
+                toggle.checked = false;
+            }
+
+            localStorage.setItem('theme', mode);
+
+            loadGraph('^NSEI');
+            graphData('^NSEI', '1y');
+            loadAllChangeValues('^NSEI');
+        }
+
+        function toggleTheme() {
+            const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        window.onload = function () {
+            // Set theme first
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+
+            // Then load default graph
+            loadGraph('^NSEI');
+            graphData('^NSEI', '1y');
+            loadAllChangeValues('^NSEI');
+        };
+
+    </script>
+
+</body>
+
+</html>

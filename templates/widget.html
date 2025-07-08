@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gauge Speedometer</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      background-color: rgb(212, 234, 241);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .navbar-dark {
+      background-color: #1f1f1f !important;
+      border-color: #444;
+    }
+
+    .navbar navbar-default {
+      background-color: whitesmoke;
+      height: 50px;
+      overflow: hidden;
+    }
+
+    .logo-wrapper {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+
+    .logo-img {
+      height: 40px;
+      transform-origin: left center;
+      position: relative;
+      top: -10px;
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #ccc;
+      border-radius: 20px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: 0.4s;
+    }
+
+    /* Corrected knob styling */
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      /* Only use left, remove right */
+      bottom: 2px;
+      /* Center vertically with some spacing */
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    /* Checked style */
+    input:checked+.slider {
+      background-color: #41a782;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(20px);
+      /* Adjust distance as per width */
+    }
+
+    /* Optional: Add round style */
+    .slider.round {
+      border-radius: 25px;
+    }
+
+    .main-container {
+      display: flex;
+      height: calc(100vh - 50px);
+      width: 100vw;
+    }
+
+    .left-column {
+      width: 20vw;
+      padding: 20px;
+      border-right: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .left-column input,
+    .left-column button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    .left-column button {
+      background-color: #6c5ce7;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 999px;
+    }
+
+    .left-column button:hover {
+      background-color: #5a4fd6;
+    }
+
+    .right-column {
+      width: 75vw;
+      padding: 20px;
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .speedometer {
+      position: relative;
+      width: 500px;
+      height: 500px;
+      margin: 0 auto;
+    }
+
+    .speedometer__needle {
+      position: absolute;
+      width: 4px;
+      height: 200px;
+      background: #333;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, 0%) rotate(-90deg);
+      transform-origin: bottom center;
+      transition: transform 0.4s ease-in-out;
+      z-index: 3;
+    }
+
+    .canvas {
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      display: block;
+    }
+
+    #speedometer__value {
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .signal-counts {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .signal-counts table {
+      border-collapse: collapse;
+    }
+
+    .signal-counts th,
+    .signal-counts td {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+
+    body.dark-mode {
+      background-color: #000000;
+      color: white;
+    }
+
+    body.dark-mode .left-column {
+      border-right: 1px solid #444;
+    }
+
+    body.dark-mode .left-column input {
+      background-color: #333;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .speedometer__needle {
+      background: white;
+    }
+
+    .navbar-dark {
+      background-color: #1f1f1f !important;
+      border-color: #444;
+    }
+
+    body.dark-mode .dropdown-menu {
+      background-color: #2e2e2e;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    body.dark-mode .dropdown-menu>li>a {
+      color: white;
+    }
+
+    body.dark-mode .dropdown-menu>li>a:hover {
+      background-color: #444;
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="/">
+          <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+        </a>
+      </div>
+      <ul class="nav navbar-nav">
+        <li><a href="/">Home</a></li>
+        <li class="dropdown">
+          <a class="dropdown-toggle" data-toggle="dropdown">Service <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/market_form">Market Insight</a></li>
+            <li><a href="/company_form">Company Insight</a></li>
+            <li><a href="/pnl_form">P&L Calculation</a></li>
+            <li><a href="/indicator_form">Indicators</a></li>
+            <li><a href="/widgets_form">Widgets</a></li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+        <li style="float: right; margin-right: 20px; margin-top: 12px;">
+          <label class="switch">
+            <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+            <span class="slider round"></span>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <div class="left-column">
+      <form method="POST" action="/widgets">
+        <label for="symbol">Symbol:</label>
+        <input type="text" name="symbol" value="{{symbol}}" />
+
+        <label for="w_size">Window size:</label>
+        <input type="number" name="w_size" value="{{w_size}}" />
+
+        <button type="submit">Apply</button>
+      </form>
+    </div>
+
+    <div class="right-column">
+      <div class="speedometer">
+        <div id="speedometer__background" class="canvas" style="height: 500px; width: 500px;"></div>
+        <canvas id="speedometer__value" class="canvas" width="500" height="500"></canvas>
+        <div class="speedometer__needle js-needle"></div>
+      </div>
+
+      <div class="signal-counts" id="signalCountsContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const finalResult = "{{ final_result|default('Neutral') }}";
+    const signals = {{ signals | tojson | safe }} || [];
+
+    const signalOrder = ["Sell", "Neutral", "Buy"];
+    const colors = ["#e67e22", "#f1c40f", "#3498db"];
+
+    const dataPoints = [
+      ...signalOrder.map(() => ({ y: 1, color: "transparent" })),
+      ...signalOrder.map((signal, i) => ({
+        y: 1,
+        color: colors[i],
+        label: signal,
+        indexLabel: signal,
+        indexLabelFontColor: colors[i],
+        indexLabelPlacement: "outside",
+        indexLabelFontSize: 14
+      }))
+    ];
+
+    const chart = new CanvasJS.Chart('speedometer__background', {
+      backgroundColor: null,
+      interactivityEnabled: false,
+      animationEnabled: true,
+      data: [{
+        type: 'doughnut',
+        startAngle: 0,
+        radius: '100%',
+        innerRadius: '80%',
+        dataPoints
+      }]
+    });
+
+    function rotateNeedleToSignal(result) {
+      const index = signalOrder.findIndex(s => s.toLowerCase() === result.toLowerCase());
+      if (index === -1) return;
+      const deg = -90 + index * (180 / (signalOrder.length - 1));
+      document.querySelector('.js-needle').style.transform = `translate(-50%, 0%) rotate(${deg}deg)`;
+    }
+
+    function updateValueText(text) {
+      const canvas = document.getElementById("speedometer__value");
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "bold 26px Arial";
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.fillText(text.toUpperCase(), canvas.width / 2, canvas.height / 2 + 10);
+    }
+
+    function renderSignalCounts() {
+      const container = document.getElementById("signalCountsContainer");
+      const indicators = signals.map(sig => sig.split(":"));
+
+      const headerRow = indicators.map(([ind]) => `<th>${ind}</th>`).join("");
+      const valueRow = indicators.map(([_, val]) => {
+        let color = "#fff";
+        if (val === "Buy") color = "#3498db";
+        else if (val === "Sell") color = "#e67e22";
+        else if (val === "Neutral") color = "#f1c40f";
+        return `<td style="color:${color}; font-weight:bold;">${val}</td>`;
+      }).join("");
+
+      container.innerHTML = `<table style="margin: 0 auto;"><tr>${headerRow}</tr><tr>${valueRow}</tr></table>`;
+    }
+
+
+
+    function setTheme(mode) {
+      const body = document.body;
+      const navbar = document.querySelector('.navbar');
+      const toggle = document.getElementById('themeToggle');
+      const label = document.getElementById('themeLabel');
+      currentTheme = mode;
+
+      if (mode === 'dark') {
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
+        navbar.classList.add('navbar-dark');
+        toggle.checked = true;
+      } else {
+        body.classList.add('light-mode');
+        body.classList.remove('dark-mode');
+        navbar.classList.remove('navbar-dark');
+        toggle.checked = false;
+      }
+      localStorage.setItem('theme', mode);
+
+    }
+
+    function toggleTheme() {
+      const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+      setTheme(newTheme);
+    }
+
+    window.onload = function () {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+      chart.render();
+      rotateNeedleToSignal(finalResult);
+      updateValueText(finalResult);
+      renderSignalCounts();
+    };
+  </script>
+</body>
+
+</html>

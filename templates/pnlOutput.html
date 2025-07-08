@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>P&L Calculation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: rgb(212, 234, 241);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .navbar-dark {
+            background-color: #1f1f1f !important;
+            border-color: #444;
+        }
+
+        .navbar navbar-default {
+            background-color: whitesmoke;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .logo-img {
+            height: 40px;
+            transform-origin: left center;
+            position: relative;
+            top: -10px;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            background-color: #ccc;
+            border-radius: 20px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            transition: 0.4s;
+        }
+
+        /* Corrected knob styling */
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            /* Only use left, remove right */
+            bottom: 2px;
+            /* Center vertically with some spacing */
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        /* Checked style */
+        input:checked+.slider {
+            background-color: #41a782;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            /* Adjust distance as per width */
+        }
+
+        /* Optional: Add round style */
+        .slider.round {
+            border-radius: 25px;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 50px);
+            width: 100vw;
+        }
+
+        .left-column {
+            width: 20vw;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .left-column label {
+            font-weight: bold;
+        }
+
+        .left-column input,
+        .left-column select,
+        .left-column button {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .left-column button {
+            background-color: #6c5ce7;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 999px;
+        }
+
+        .left-column button:hover {
+            background-color: #5a4fd6;
+        }
+
+        .right-column {
+            width: 80vw;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .right-column h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            max-width: 600px;
+            margin: auto;
+            display: block;
+            height: 200px;
+        }
+
+        canvas#myChart {
+            width: 100% !important;
+            max-width: 1000px;
+            height: 400px !important;
+            margin: 0 auto;
+            display: block;
+        }
+
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: lightslategray;
+        }
+
+        /* DARK MODE */
+        body.dark-mode {
+            background-color: #000000;
+            color: white;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .left-column {
+            border-right: 1px solid #444;
+        }
+
+        body.dark-mode .right-column table {
+            background-color: #1e1e1e;
+        }
+
+        body.dark-mode th {
+            background-color: #333;
+            color: white;
+        }
+
+        body.dark-mode td {
+            border-color: #444;
+        }
+
+        body.dark-mode .dropdown-menu {
+            background-color: #2e2e2e;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark-mode .dropdown-menu>li>a {
+            color: white;
+        }
+
+        body.dark-mode .dropdown-menu>li>a:hover {
+            background-color: #444;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='logo.png') }}" alt="TradeVista" class="logo-img">
+                </a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">Service <span
+                            class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/market_form">Market Insight</a></li>
+                        <li><a href="/company_form">Company Insight</a></li>
+                        <li><a href="/pnl_form">P&L Calculation</a></li>
+                        <li><a href="/indicator_form">Indicators</a></li>
+                        <li><a href="/widgets_form">Widgets</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <label style="font-weight: bold;margin-right: 7px;margin-top: 13.5px;">Dark-theme:</label>
+                <li style="float: right; margin-right: 20px; margin-top: 12px;">
+                    <label class="switch">
+                        <input type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                        <span class="slider round"></span>
+                    </label>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Layout -->
+    <div class="main-container">
+        <!-- Left Column -->
+        <div class="left-column">
+            <form method="POST" action="/pnlCalculation">
+                <label>Entry Date:</label>
+                <input type="date" name="entry_date">
+
+                <label>Exit Date:</label>
+                <input type="date" name="exit_date">
+
+                <label>Entry Time:</label>
+                <input type="time" name="entry_time">
+
+                <label>Exit Time:</label>
+                <input type="time" name="exit_time">
+
+                <label>Position:</label>
+                <select name="position_type" required>
+                    <option value=""></option>
+                    <option value="long">Long</option>
+                    <option value="short">Short</option>
+                </select>
+
+                <label>Company Symbol:</label>
+                <input type="text" name="symbol" placeholder="Enter the symbol">
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <!-- Right Column -->
+        <div class="right-column">
+            <h3>Calculated Profit and Loss for {{ symbol }}</h3>
+
+            {% if result %}
+            <!-- Chart -->
+            <canvas id="myChart"></canvas>
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Entry Close Price</th>
+                        <th>Exit Close Price</th>
+                        <th>P&L</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in result %}
+                    <tr>
+                        <td>{{ i.Date }}</td>
+                        <td>{{ i.Entry_close_price }}</td>
+                        <td>{{ i.Exit_close_price }}</td>
+                        <td>{{ i.pnl }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="text-align:center; color:gray;">No data to display. Please submit the form.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Chart Script -->
+    <script>
+        const chartData = {{ result | tojson | safe }};
+        if (chartData.length > 0) {
+            const labels = chartData.map(item => item.Date);
+            const data = chartData.map(item => item.pnl);
+            const color = chartData.map(item => item.pnl > 0 ? "lightgreen" : item.pnl < 0 ? "coral" : "gray");
+
+            new Chart(document.getElementById("myChart"), {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        backgroundColor: color,
+                        data: data
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: "PnL" }
+                    }
+                }
+            });
+        }
+    </script>
+
+    <!-- Theme Script -->
+    <script>
+        function setTheme(mode) {
+            const body = document.body;
+            const navbar = document.querySelector('.navbar');
+            const toggle = document.getElementById('themeToggle');
+            const label = document.getElementById('themeLabel');
+            currentTheme = mode;
+
+            if (mode === 'dark') {
+                body.classList.add('dark-mode');
+                body.classList.remove('light-mode');
+                navbar.classList.add('navbar-dark');
+                toggle.checked = true;
+            } else {
+                body.classList.add('light-mode');
+                body.classList.remove('dark-mode');
+                navbar.classList.remove('navbar-dark');
+                toggle.checked = false;
+            }
+            localStorage.setItem('theme', mode);
+        }
+
+        function toggleTheme() {
+            const newTheme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        window.onload = function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        };
+    </script>
+
+    {% if popup %}
+    <script>alert("{{popup}}")</script>
+    {% endif %}
+
+</body>
+
+</html>
