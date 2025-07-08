@@ -26,8 +26,6 @@ app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 symbols_df = pd.read_csv("D:/Arkalogi/Project/Data/nifty50_symbols.csv")
 symbols = symbols_df['tradingsymbol'].to_list()
-download_day_data()
-download_minute_data()
 
 class company_validation(BaseModel):
     num : int
@@ -79,6 +77,8 @@ def home():
         symbol = item["symbol"]
         download_ticker_day_data(symbol)
         download_minute_data_if_missing(symbol)
+        download_day_data()
+        download_minute_data()
 
         data = pd.read_csv(f"D:/Arkalogi/Project/Data/Ticker_data/{symbol}.csv")
         value = round(data['Close'].iloc[-1],2)
